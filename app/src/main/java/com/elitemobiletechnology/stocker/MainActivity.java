@@ -1,33 +1,34 @@
 package com.elitemobiletechnology.stocker;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
-import android.media.Image;
+import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.NumberPicker;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends ActionBarActivity {
+    private static final String TAG = "onCreate";
     ActionBar actionBar;
     ImageView buttonAdd;
+    GridView gridview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d(TAG, "oncreate");
         setActionBar();
         buttonAdd = (ImageView) findViewById(R.id.ivAdd);
         buttonAdd.setOnClickListener(new View.OnClickListener() {
@@ -36,11 +37,30 @@ public class MainActivity extends ActionBarActivity {
                 openDialogBox();
             }
         });
+        gridview = (GridView) findViewById(R.id.gridview);
+        ArrayList<Stock> stocks = new ArrayList<Stock>();
+        Stock google = new Stock();
+        google.setName("GOOGLE");
+        google.setPrice("$100");
+        stocks.add(google);
+        Stock apple = new Stock();
+        apple.setName("APPLE");
+        apple.setPrice("$550");
+        stocks.add(apple);
+        gridview.setEmptyView(findViewById(R.id.empty_grid_view));
+        gridview.setAdapter(new StockGridAdapter(this, stocks));
 
     }
 
-    private void changePercentage(int change){
-
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            gridview.setNumColumns(2);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            gridview.setNumColumns(1);
+        }
     }
 
     private void openDialogBox() {
@@ -57,7 +77,7 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(View v) {
                 int change = 0;
                 try {
-                    change = Integer.parseInt(etPercentChange.getText().toString())+1;
+                    change = Integer.parseInt(etPercentChange.getText().toString()) + 1;
                     etPercentChange.setText(String.valueOf(change));
                 } catch (NumberFormatException e) {
                     change = 0;

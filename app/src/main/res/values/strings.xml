@@ -8,4 +8,6 @@
     <string name="notify_once">notify once when</string>
     <string name="price_changes"> % price changes</string>
     <string name="add_stock_text">add stock</string>
+
+
 </resources>
