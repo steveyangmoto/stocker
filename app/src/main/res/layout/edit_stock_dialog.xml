@@ -38,6 +38,7 @@
         android:layout_alignBaseline="@+id/tvStockSymbol"
         android:ems="6"
         android:maxLines="1"
+        android:singleLine="true"
         android:paddingLeft="5dp"
         android:background="@drawable/edit_text_border"
         android:id="@+id/etStockSymbol" />

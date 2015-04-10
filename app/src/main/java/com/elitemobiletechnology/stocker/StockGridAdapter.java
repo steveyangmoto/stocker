@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.elitemobiletechnology.stocker.model.Stock;
+
 import java.util.ArrayList;
 
 /**
@@ -48,17 +50,24 @@ public class StockGridAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.stock_item_layout, null);
             holder.stockName = (TextView) convertView.findViewById(R.id.tvStockName);
             holder.stockPrice = (TextView) convertView.findViewById(R.id.tvStockPrice);
+            holder.stockSymbol = (TextView) convertView.findViewById(R.id.tvStockSymbol);
             convertView.setTag(holder);
         }else{
             holder = (ViewHolder)convertView.getTag();
         }
+        String symbol = stock.getSymbol();
+        if(symbol!=null){
+            symbol=symbol.toUpperCase();
+            holder.stockSymbol.setText("["+symbol+"]");
+        }
         holder.stockName.setText(stock.getName());
-        holder.stockPrice.setText(stock.getPrice());
+        holder.stockPrice.setText(stock.getLastTradePriceOnly());
         return convertView;
     }
 
     private static class ViewHolder {
         public TextView stockName;
         public TextView stockPrice;
+        public TextView stockSymbol;
     }
 }

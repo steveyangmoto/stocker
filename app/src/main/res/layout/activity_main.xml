@@ -15,14 +15,6 @@
         android:visibility="gone"
         android:layout_centerInParent="true" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ivAdd"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_centerVertical="true"
-        android:src="@mipmap/add" />
 
     <LinearLayout
         android:id="@+id/layout_update"
@@ -43,7 +35,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=" 2 "
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="0"
             android:id="@+id/tvTimeUpdated"
             android:fontFamily="sans-serif-regular" />
 
@@ -81,4 +75,14 @@
         android:background="#6b6c92"
         android:layout_width="fill_parent"
         android:layout_height="1dp" />
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivAdd"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/add_icon_selector" />
 </RelativeLayout>
