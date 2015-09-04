@@ -1,13 +1,16 @@
 <resources>
-    <string name="app_name">STOCKER</string>
-    <string name="edit_stock_text">edit stock</string>
+    <string name="app_name">stockEZ</string>
+    <string name="edit_stock_text">Edit Stock</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="no_stock_message">add stocks to track</string>
     <string name="stock_symbol">stock symbol</string>
     <string name="notify_once">notify once when</string>
     <string name="price_changes"> % price changes</string>
-    <string name="add_stock_text">add stock</string>
+    <string name="add_stock_text">Add Stock</string>
+    <string name="fail_to_retrieve_stock">Could not find specified stock symbol</string>
+    <string name="delete_stock">Are you sure you want to delete stock&#160;</string>
+
 
 
 </resources>
