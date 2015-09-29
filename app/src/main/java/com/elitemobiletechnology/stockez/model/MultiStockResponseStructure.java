@@ -1,4 +1,4 @@
-package com.elitemobiletechnology.stocker.model;
+package com.elitemobiletechnology.stockez.model;
 
 import java.util.ArrayList;
 

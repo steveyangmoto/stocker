@@ -1,16 +1,18 @@
 <resources>
-    <string name="app_name">stockEZ</string>
+    <string name="app_name">StockEZ</string>
     <string name="edit_stock_text">Edit Stock</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="no_stock_message">add stocks to track</string>
-    <string name="stock_symbol">stock symbol</string>
-    <string name="notify_once">notify once when</string>
+    <string name="no_stock_message">Add stocks to track</string>
+    <string name="stock_symbol">Stock symbol</string>
+    <string name="notify_once">Notify once when</string>
     <string name="price_changes"> % price changes</string>
     <string name="add_stock_text">Add Stock</string>
     <string name="fail_to_retrieve_stock">Could not find specified stock symbol</string>
+    <string name="stock_already_exist">Stock has already been added.</string>
     <string name="delete_stock">Are you sure you want to delete stock&#160;</string>
-
-
-
+    <string name="risen">risen</string>
+    <string name="dropped">dropped</string>
+    <string name="has">has</string>
+    <string name="to">to</string>
 </resources>

@@ -28,15 +28,30 @@
             android:fontFamily="sans-serif-light"
             android:id="@+id/tvStockName" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:gravity="left"
-            android:fontFamily="sans-serif-light"
-            android:id="@+id/tvStockSymbol" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:gravity="left"
+                android:fontFamily="sans-serif-light"
+                android:id="@+id/tvStockSymbol" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_gravity="center_vertical"
+                android:fontFamily="sans-serif-bold"
+                android:id="@+id/tvPriceChange" />
+        </LinearLayout>
     </LinearLayout>
 
     <TextView

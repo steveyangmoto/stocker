@@ -1,11 +1,11 @@
-package com.elitemobiletechnology.stocker;
+package com.elitemobiletechnology.stockez;
 
 import android.net.Uri;
 import android.util.Log;
 
-import com.elitemobiletechnology.stocker.model.MultiStockResponseStructure;
-import com.elitemobiletechnology.stocker.model.SingleStockResponseStructure;
-import com.elitemobiletechnology.stocker.model.Stock;
+import com.elitemobiletechnology.stockez.model.MultiStockResponseStructure;
+import com.elitemobiletechnology.stockez.model.SingleStockResponseStructure;
+import com.elitemobiletechnology.stockez.model.Stock;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 
@@ -63,6 +63,9 @@ public class StockGrabber {
 
     public ArrayList<Stock> getStocks(ArrayList<String> stockSymobols) {
         String symbols = "";
+        if(stockSymobols.size()<=0){
+            return null;
+        }
         for (String symbol : stockSymobols) {
             symbols += symbol + ",";
         }
@@ -78,7 +81,7 @@ public class StockGrabber {
         }
         HttpRequest request = HttpRequest.get(url);
 
-        if (request.ok()) {
+        if (request!=null&&request.ok()) {
             String response = request.body();
             try {
                 MultiStockResponseStructure responseStructure = gson.fromJson(response, MultiStockResponseStructure.class);

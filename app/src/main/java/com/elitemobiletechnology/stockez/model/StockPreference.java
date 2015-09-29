@@ -1,9 +1,11 @@
-package com.elitemobiletechnology.stocker.model;
+package com.elitemobiletechnology.stockez.model;
+
+import java.io.Serializable;
 
 /**
  * Created by SteveYang on 15/9/4.
  */
-public class StockPreference {
+public class StockPreference implements Serializable{
 
     private String stockSymbol;
     private String notifyOnPercentChange;

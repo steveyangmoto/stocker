@@ -1,6 +1,4 @@
-package com.elitemobiletechnology.stocker.model;
-
-import java.util.ArrayList;
+package com.elitemobiletechnology.stockez.model;
 
 /**
  * Created by SteveYang on 4/9/15.

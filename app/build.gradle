@@ -5,13 +5,17 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "com.elitemobiletechnology.stocker"
+        applicationId "com.elitemobiletechnology.stockez"
         minSdkVersion 14
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
     buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

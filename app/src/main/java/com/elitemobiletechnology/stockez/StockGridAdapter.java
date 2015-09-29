@@ -1,13 +1,14 @@
-package com.elitemobiletechnology.stocker;
+package com.elitemobiletechnology.stockez;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.elitemobiletechnology.stocker.model.Stock;
+import com.elitemobiletechnology.stockez.model.Stock;
 
 import java.util.ArrayList;
 
@@ -51,6 +52,7 @@ public class StockGridAdapter extends BaseAdapter {
             holder.stockName = (TextView) convertView.findViewById(R.id.tvStockName);
             holder.stockPrice = (TextView) convertView.findViewById(R.id.tvStockPrice);
             holder.stockSymbol = (TextView) convertView.findViewById(R.id.tvStockSymbol);
+            holder.stockPriceChange = (TextView)convertView.findViewById(R.id.tvPriceChange);
             convertView.setTag(holder);
         }else{
             holder = (ViewHolder)convertView.getTag();
@@ -61,7 +63,24 @@ public class StockGridAdapter extends BaseAdapter {
             holder.stockSymbol.setText("["+symbol+"]");
         }
         holder.stockName.setText(stock.getName());
-        holder.stockPrice.setText(stock.getLastTradePriceOnly());
+        String price = stock.getLastTradePriceOnly();
+        String change = stock.getPercentChange();
+        holder.stockPriceChange.setText(change);
+        change = change.replace('%',' ');
+        Double priceInDouble = 0d;
+        Double changeInDouble = 0d;
+        try{
+            priceInDouble = Double.parseDouble(price);
+            holder.stockPrice.setText("$"+String.format("%.2f",priceInDouble));
+            changeInDouble = Double.parseDouble(change);
+            if(changeInDouble>0){
+                holder.stockPriceChange.setTextColor(Color.parseColor("#42be38"));
+            }else if(changeInDouble<0){
+                holder.stockPriceChange.setTextColor(Color.parseColor("#ff0000"));
+            }
+        }catch(NumberFormatException ignore){
+            holder.stockPrice.setText("$"+price);
+        }
         return convertView;
     }
 
@@ -69,5 +88,6 @@ public class StockGridAdapter extends BaseAdapter {
         public TextView stockName;
         public TextView stockPrice;
         public TextView stockSymbol;
+        public TextView stockPriceChange;
     }
 }

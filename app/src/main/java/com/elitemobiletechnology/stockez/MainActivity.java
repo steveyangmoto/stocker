@@ -1,14 +1,20 @@
-package com.elitemobiletechnology.stocker;
+package com.elitemobiletechnology.stockez;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -22,22 +28,26 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.elitemobiletechnology.stocker.model.Stock;
-import com.elitemobiletechnology.stocker.model.StockPreference;
-
-import org.w3c.dom.Text;
+import com.elitemobiletechnology.stockez.model.Stock;
+import com.elitemobiletechnology.stockez.model.StockPreference;
+import com.elitemobiletechnology.stockez.model.UserDataDAL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.ListIterator;
+import java.util.Map;
 
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "onCreate";
-    ArrayList<Stock> myStocks = new ArrayList<Stock>();
-    HashMap<String, StockPreference> userPreferences = new HashMap<String, StockPreference>();
+    private final ArrayList<Stock> myStocks = new ArrayList<Stock>();
+    private ArrayList<StockPreference> userPreferences = null;
     StockGridAdapter gridAdapter;
     Handler handler = new Handler();
     ActionBar actionBar;
@@ -52,6 +62,42 @@ public class MainActivity extends ActionBarActivity {
             handler.postDelayed(this, 1000);
         }
     };
+
+    private void displayNotifcation() {
+        for(StockPreference stockPref:userPreferences){
+            String stockSymbol = stockPref.getStockSymbol();
+            String notifyOnChange = stockPref.getNotifyOnPercentChange();
+            float stockPercentOnNotify = 0;
+            try {
+                Log.d(TAG,"stock percentOnNotify:"+notifyOnChange);
+                stockPercentOnNotify = Float.parseFloat(notifyOnChange);
+            }catch(NumberFormatException ignore){
+                continue;
+            }
+            if(stockPercentOnNotify!=0) {
+                for (Stock stock : myStocks) {
+                    if (stock.getSymbol().equals(stockSymbol)) {
+                        String stockPercentChange = stock.getPercentChange();
+                        stockPercentChange = stockPercentChange.replace('%', ' ');
+                        try {
+                            float stockPercentFloat = Float.parseFloat(stockPercentChange);
+                            Log.d(TAG,stockSymbol+ " stock percent change: "+stockPercentFloat);
+                            Log.d(TAG,"stock percent on notify: "+stockPercentOnNotify);
+                            if (Math.abs(stockPercentFloat)>=Math.abs(stockPercentOnNotify)) {
+                                if(stockPercentFloat<0) {
+                                    StockNotificationHelper.show(this.getApplicationContext(), stock.getSymbol(), false, stock.getLastTradePriceOnly(), stock.getPercentChange());
+                                }else{
+                                    StockNotificationHelper.show(this.getApplicationContext(), stock.getSymbol(), true, stock.getLastTradePriceOnly(), stock.getPercentChange());
+                                }
+                                break;
+                            }
+                        } catch (NumberFormatException ignore) {
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,16 +123,25 @@ public class MainActivity extends ActionBarActivity {
                 try {
                     Stock aStock = myStocks.get(position);
                     if (aStock != null) {
-                        StockPreference pref = userPreferences.get(aStock.getSymbol());
+                        StockPreference pref = findStockPrefBySymbol(aStock.getSymbol());
                         openDialogBox(pref.getStockSymbol(), pref.getNotifyOnPercentChange(), true);
                     }
                 } catch (Exception ignore) {
                 }
             }
         });
-
+        userPreferences = UserDataDAL.get().getUserStockPreference(MainActivity.this);
+        new UpdateStockListTask().execute();
     }
 
+    private StockPreference findStockPrefBySymbol(String symbol){
+        for(StockPreference stockPref:userPreferences){
+            if(stockPref.getStockSymbol().equals(symbol)){
+                return stockPref;
+            }
+        }
+        return null;
+    }
     @Override
     public void onStart() {
         super.onStart();
@@ -99,47 +154,67 @@ public class MainActivity extends ActionBarActivity {
         super.onStop();
     }
 
-    public class AddStockTask extends AsyncTask<StockPreference, Boolean, Boolean> {
+    @Override public void onPause(){
+        UserDataDAL.get().saveUserStockPreference(MainActivity.this, userPreferences);
+        super.onPause();
+    }
+
+    public static enum Signal {
+        NOT_FOUND, EXIST, SUCCESS
+    }
+
+    public class AddStockTask extends AsyncTask<StockPreference, Signal, Signal> {
         private static final String TAG = "StockDataDownloadTask";
 
         @Override
-        protected Boolean doInBackground(StockPreference... preference) {
+        protected Signal doInBackground(StockPreference... preference) {
             StockPreference stockInfo = preference[0];
-            if (!userPreferences.containsKey(stockInfo.getStockSymbol())) {
+            if (findStockPrefBySymbol(stockInfo.getStockSymbol())==null) {
                 Stock stock = StockGrabber.get().getStock(stockInfo.getStockSymbol());
                 if (stock != null) {
-                    userPreferences.put(stock.getSymbol(), stockInfo);
+                    userPreferences.add(0,stockInfo);
                     myStocks.add(0, stock);
-                    return true;
+                    return Signal.SUCCESS;
                 }
+            } else {
+                return Signal.EXIST;
             }
-            return false;
+            return Signal.NOT_FOUND;
         }
 
         @Override
-        protected void onPostExecute(Boolean changed) {
-            if (changed) {
+        protected void onPostExecute(Signal status) {
+            if (status == Signal.SUCCESS) {
                 gridAdapter.notifyDataSetChanged();
-            } else {
+            } else if (status == Signal.NOT_FOUND) {
                 Toast toast = Toast.makeText(MainActivity.this, getString(R.string.fail_to_retrieve_stock), Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            } else {
+                Toast toast = Toast.makeText(MainActivity.this, getString(R.string.stock_already_exist), Toast.LENGTH_LONG);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();
             }
         }
-
-
     }
 
     public class UpdateStockListTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
-            ArrayList<String> stockSymbols = new ArrayList<String>();
-            for (int i = 0; i < myStocks.size(); i++) {
-                stockSymbols.add(myStocks.get(i).getSymbol());
+            if(userPreferences.size()>0) {
+                ArrayList<String> stockSymbols = new ArrayList<String>();
+                for (StockPreference stockPref : userPreferences) {
+                    stockSymbols.add(stockPref.getStockSymbol());
+                }
+                ArrayList<Stock> stocks = StockGrabber.get().getStocks(stockSymbols);
+                if (stocks != null) {
+                    myStocks.clear();
+                    for (Stock stock : stocks) {
+                        myStocks.add(stock);
+                    }
+                }
             }
-            ArrayList<Stock> stocks = StockGrabber.get().getStocks(stockSymbols);
-            myStocks = stocks;
             lastUpdateTime = System.currentTimeMillis();
             return null;
         }
@@ -147,6 +222,7 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             gridAdapter.notifyDataSetChanged();
+
         }
     }
 
@@ -189,7 +265,11 @@ public class MainActivity extends ActionBarActivity {
                     if (!update) {
                         new AddStockTask().execute(preference);
                     } else {
-                        userPreferences.put(stockSymbol, preference);
+                        StockPreference stockPref = findStockPrefBySymbol(stockSymbol);
+                        if(stockPref!=null) {
+                            stockPref.setStockSymbol(preference.getStockSymbol());
+                            stockPref.setNotifyOnPercentChange(preference.getNotifyOnPercentChange());
+                        }
                     }
                 }
                 myDialog.cancel();
@@ -206,6 +286,7 @@ public class MainActivity extends ActionBarActivity {
             tvTitle.setText(getString(R.string.edit_stock_text));
             etStockSymbol.setEnabled(false);
             etNotify.requestFocus();
+            myDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             trash_can.setVisibility(View.VISIBLE);
             trash_can.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -239,12 +320,21 @@ public class MainActivity extends ActionBarActivity {
                 .setMessage(message).setCancelable(false).setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        userPreferences.remove(stockToDelete);
-                        gridAdapter.notifyDataSetChanged();
-                        for (Stock stock : myStocks) {
+                        Iterator iterator = userPreferences.iterator();
+                        while (iterator.hasNext()) {
+                            StockPreference stockPref = (StockPreference)iterator.next();
+                            if(stockPref.getStockSymbol().equals(stockToDelete)){
+                                iterator.remove();
+                                break;
+                            }
+                        }
+                        iterator = myStocks.iterator();
+                        while(iterator.hasNext()){
+                            Stock stock = (Stock)iterator.next();
                             if (stock.getSymbol().equals(stockToDelete)) {
                                 myStocks.remove(stock);
                                 parentDialog.cancel();
+                                gridAdapter.notifyDataSetChanged();
                                 break;
                             }
                         }
@@ -259,9 +349,9 @@ public class MainActivity extends ActionBarActivity {
         alertYes.setTextColor(Color.WHITE);
         alertNo.setBackgroundColor(getResources().getColor(R.color.stocker_gray));
         alertNo.setTextColor(Color.WHITE);
-        TextView messageText = (TextView)confirmationDialog.findViewById(android.R.id.message);
+        TextView messageText = (TextView) confirmationDialog.findViewById(android.R.id.message);
         messageText.setTextSize(13);
-        messageText.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL);
+        messageText.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
 
     }
 
@@ -278,9 +368,14 @@ public class MainActivity extends ActionBarActivity {
         ivRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                displayNotifcation();
+                Toast toast = Toast.makeText(MainActivity.this, "refreshing...", Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
                 new UpdateStockListTask().execute();
             }
         });
         actionBar.setCustomView(viewActionBar);
     }
+
 }
