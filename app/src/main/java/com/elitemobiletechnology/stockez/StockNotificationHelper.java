@@ -39,7 +39,7 @@ public class StockNotificationHelper {
         stringBuilder.append("(" + changePercentage + ")");
         remoteViews.setTextViewText(R.id.stockInfo, Html.fromHtml(stringBuilder.toString()));
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-                context).setSmallIcon(R.mipmap.ic_launcher).setContent(
+                context).setSmallIcon(R.mipmap.stockez_icon).setContent(
                 remoteViews).setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         Intent resultIntent = new Intent(context, MainActivity.class);
         resultIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -53,7 +53,6 @@ public class StockNotificationHelper {
                         0,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
-        Log.d(TAG, "visible");
         mBuilder.setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});
 
         mBuilder.setContentIntent(resultPendingIntent);
@@ -62,7 +61,7 @@ public class StockNotificationHelper {
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(stockSymbol.hashCode(), mBuilder.build());
-        Log.d(TAG, "stock hashcocde: " + stockSymbol.hashCode());
+        //Log.d(TAG, "stock hashcocde: " + stockSymbol.hashCode());
 
     }
 }

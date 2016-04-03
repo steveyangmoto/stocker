@@ -4,6 +4,10 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.elitemobiletechnology.stockez.model.MultiStockResponseStructure;
+import com.elitemobiletechnology.stockez.model.MultiItemQuery;
+import com.elitemobiletechnology.stockez.model.MultiItemResult;
+import com.elitemobiletechnology.stockez.model.SingleItemQuery;
+import com.elitemobiletechnology.stockez.model.SingleItemResult;
 import com.elitemobiletechnology.stockez.model.SingleStockResponseStructure;
 import com.elitemobiletechnology.stockez.model.Stock;
 import com.github.kevinsawicki.http.HttpRequest;
@@ -43,9 +47,9 @@ public class StockGrabber {
             String response = request.body();
             try {
                 SingleStockResponseStructure responseStructure = gson.fromJson(response, SingleStockResponseStructure.class);
-                SingleStockResponseStructure.QUERY query = responseStructure.getQuery();
+                SingleItemQuery query = responseStructure.getQuery();
                 if (query != null) {
-                    SingleStockResponseStructure.QUERY.RESULT results = query.getResults();
+                    SingleItemResult results = query.getResults();
                     if (results != null) {
                         Stock stock = results.getQuote();
                         if (stock.getSymbol() != null && stock.getName() != null && stock.getLastTradePriceOnly() != null && stock.getPercentChange() != null) {
@@ -82,17 +86,30 @@ public class StockGrabber {
         HttpRequest request = HttpRequest.get(url);
 
         if (request!=null&&request.ok()) {
+
             String response = request.body();
             try {
                 MultiStockResponseStructure responseStructure = gson.fromJson(response, MultiStockResponseStructure.class);
-                MultiStockResponseStructure.QUERY query = responseStructure.getQuery();
+                MultiItemQuery query = responseStructure.getQuery();
                 if (query != null) {
-                    MultiStockResponseStructure.QUERY.RESULT results = query.getResults();
+                    MultiItemResult results = query.getResults();
                     if (results != null) {
                         return results.getQuote();
                     }
                 }
             } catch (Exception e) {
+                try{
+                    SingleStockResponseStructure responseStructure = gson.fromJson(response, SingleStockResponseStructure.class);
+                    SingleItemQuery query = responseStructure.getQuery();
+                    if (query != null) {
+                        SingleItemResult result = query.getResults();
+                        if (result != null) {
+                            ArrayList<Stock> stockList = new ArrayList<>();
+                            stockList.add(result.getQuote());
+                            return stockList;
+                        }
+                    }
+                }catch(Exception ignore){}
                 Log.e(TAG, e.getMessage());
             }
         }

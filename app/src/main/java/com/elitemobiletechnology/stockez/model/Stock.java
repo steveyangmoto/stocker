@@ -1,13 +1,28 @@
 package com.elitemobiletechnology.stockez.model;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
+
 /**
  * Created by SteveYang on 4/9/15.
  */
-public class Stock {
+public class Stock implements Serializable {
+    static final long serialVersionUID = 1L; //assign a long value
+
+    @SerializedName("symbol")
     private String symbol;
-    private String LastTradePriceOnly;
-    private String Name;
-    private String PercentChange;
+
+    @SerializedName("LastTradePriceOnly")
+    private String lastTradePriceOnly;
+
+    @SerializedName("Name")
+    private String name;
+
+    @SerializedName("PercentChange")
+    private String percentChange;
+
+    private String eliteMobileTechnologyPercentOnNotify;
 
     public String getSymbol() {
         return symbol;
@@ -18,27 +33,42 @@ public class Stock {
     }
 
     public String getLastTradePriceOnly() {
-        return LastTradePriceOnly;
+        return lastTradePriceOnly;
     }
 
     public void setLastTradePriceOnly(String lastTradePriceOnly) {
-        LastTradePriceOnly = lastTradePriceOnly;
+        this.lastTradePriceOnly = lastTradePriceOnly;
     }
 
     public String getName() {
-        return Name;
+        return name;
     }
 
     public void setName(String name) {
-        Name = name;
+        this.name = name;
     }
 
     public String getPercentChange() {
-        return PercentChange;
+        return percentChange;
     }
 
     public void setPercentChange(String percentChange) {
-        PercentChange = percentChange;
+        this.percentChange = percentChange;
+    }
+
+    public String getEliteMobileTechnologyPercentOnNotify() {
+        return eliteMobileTechnologyPercentOnNotify;
+    }
+
+    public void setEliteMobileTechnologyPercentOnNotify(String eliteMobileTechnologyPercentOnNotify) {
+        this.eliteMobileTechnologyPercentOnNotify = eliteMobileTechnologyPercentOnNotify;
+    }
+
+    public void updateData(Stock newStockInfo) {
+        this.symbol = newStockInfo.getSymbol();
+        this.lastTradePriceOnly = newStockInfo.getLastTradePriceOnly();
+        this.name = newStockInfo.getName();
+        this.percentChange = newStockInfo.getPercentChange();
     }
 
 }

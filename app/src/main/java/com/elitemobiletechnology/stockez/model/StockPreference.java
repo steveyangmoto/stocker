@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by SteveYang on 15/9/4.
  */
 public class StockPreference implements Serializable{
-
+    static final long serialVersionUID = 1L; //assign a long value
     private String stockSymbol;
     private String notifyOnPercentChange;
 

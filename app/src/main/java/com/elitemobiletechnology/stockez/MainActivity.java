@@ -2,9 +2,6 @@ package com.elitemobiletechnology.stockez;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -13,8 +10,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -28,82 +23,62 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.elitemobiletechnology.stockez.model.Stock;
 import com.elitemobiletechnology.stockez.model.StockPreference;
 import com.elitemobiletechnology.stockez.model.UserDataDAL;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.ListIterator;
-import java.util.Map;
 
-
+/*
+    admob ID: ca-app-pub-9029792080397674/2805181546
+*/
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "onCreate";
-    private final ArrayList<Stock> myStocks = new ArrayList<Stock>();
-    private ArrayList<StockPreference> userPreferences = null;
+    private final AdRequest adRequest = new AdRequest.Builder().build();
+    private ArrayList<Stock> myStocks = null;
+    private AdView mAdView;
     StockGridAdapter gridAdapter;
     Handler handler = new Handler();
     ActionBar actionBar;
     ImageView buttonAdd;
     GridView gridview;
     TextView lastUpdated;
-    long lastUpdateTime;
     final Runnable timerTask = new Runnable() {
         public void run() {
+            long lastUpdateTime = StockezUtil.getPrefLong(MyApplication.getAppContext(),StockConstants.LAST_UPDATE_TIME);
+            if(lastUpdateTime<=0){
+                lastUpdateTime = System.currentTimeMillis();
+            }
             long timeElapsed = (System.currentTimeMillis() - lastUpdateTime) / 1000 / 60;
             lastUpdated.setText(String.valueOf(timeElapsed));
             handler.postDelayed(this, 1000);
         }
     };
 
-    private void displayNotifcation() {
-        for(StockPreference stockPref:userPreferences){
-            String stockSymbol = stockPref.getStockSymbol();
-            String notifyOnChange = stockPref.getNotifyOnPercentChange();
-            float stockPercentOnNotify = 0;
-            try {
-                Log.d(TAG,"stock percentOnNotify:"+notifyOnChange);
-                stockPercentOnNotify = Float.parseFloat(notifyOnChange);
-            }catch(NumberFormatException ignore){
-                continue;
-            }
-            if(stockPercentOnNotify!=0) {
-                for (Stock stock : myStocks) {
-                    if (stock.getSymbol().equals(stockSymbol)) {
-                        String stockPercentChange = stock.getPercentChange();
-                        stockPercentChange = stockPercentChange.replace('%', ' ');
-                        try {
-                            float stockPercentFloat = Float.parseFloat(stockPercentChange);
-                            Log.d(TAG,stockSymbol+ " stock percent change: "+stockPercentFloat);
-                            Log.d(TAG,"stock percent on notify: "+stockPercentOnNotify);
-                            if (Math.abs(stockPercentFloat)>=Math.abs(stockPercentOnNotify)) {
-                                if(stockPercentFloat<0) {
-                                    StockNotificationHelper.show(this.getApplicationContext(), stock.getSymbol(), false, stock.getLastTradePriceOnly(), stock.getPercentChange());
-                                }else{
-                                    StockNotificationHelper.show(this.getApplicationContext(), stock.getSymbol(), true, stock.getLastTradePriceOnly(), stock.getPercentChange());
-                                }
-                                break;
-                            }
-                        } catch (NumberFormatException ignore) {
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        lastUpdateTime = System.currentTimeMillis();
+        mAdView = (AdView) findViewById(R.id.adView);
+        mAdView.loadAd(adRequest);
+        mAdView.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                if (mAdView.getVisibility() != View.VISIBLE) {
+                    mAdView.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+        myStocks = UserDataDAL.get().getUserStockPreference(this.getApplicationContext());
         buttonAdd = (ImageView) findViewById(R.id.ivAdd);
         lastUpdated = (TextView) findViewById(R.id.tvTimeUpdated);
         buttonAdd.setOnClickListener(new View.OnClickListener() {
@@ -123,25 +98,24 @@ public class MainActivity extends ActionBarActivity {
                 try {
                     Stock aStock = myStocks.get(position);
                     if (aStock != null) {
-                        StockPreference pref = findStockPrefBySymbol(aStock.getSymbol());
-                        openDialogBox(pref.getStockSymbol(), pref.getNotifyOnPercentChange(), true);
+                        openDialogBox(aStock.getSymbol(), aStock.getEliteMobileTechnologyPercentOnNotify(), true);
                     }
                 } catch (Exception ignore) {
                 }
             }
         });
-        userPreferences = UserDataDAL.get().getUserStockPreference(MainActivity.this);
         new UpdateStockListTask().execute();
     }
 
-    private StockPreference findStockPrefBySymbol(String symbol){
-        for(StockPreference stockPref:userPreferences){
-            if(stockPref.getStockSymbol().equals(symbol)){
-                return stockPref;
+    private Stock findStockPrefBySymbol(String symbol) {
+        for (Stock stock : myStocks) {
+            if (stock.getSymbol().equals(symbol)) {
+                return stock;
             }
         }
         return null;
     }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -154,8 +128,15 @@ public class MainActivity extends ActionBarActivity {
         super.onStop();
     }
 
-    @Override public void onPause(){
-        UserDataDAL.get().saveUserStockPreference(MainActivity.this, userPreferences);
+    @Override
+    public void onResume(){
+        super.onResume();
+        mAdView.loadAd(adRequest);
+    }
+
+    @Override
+    public void onPause() {
+        UserDataDAL.get().saveUserStockPreference(MainActivity.this, myStocks);
         super.onPause();
     }
 
@@ -169,11 +150,12 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected Signal doInBackground(StockPreference... preference) {
             StockPreference stockInfo = preference[0];
-            if (findStockPrefBySymbol(stockInfo.getStockSymbol())==null) {
+            if (findStockPrefBySymbol(stockInfo.getStockSymbol()) == null) {
                 Stock stock = StockGrabber.get().getStock(stockInfo.getStockSymbol());
                 if (stock != null) {
-                    userPreferences.add(0,stockInfo);
+                    stock.setEliteMobileTechnologyPercentOnNotify(stockInfo.getNotifyOnPercentChange());
                     myStocks.add(0, stock);
+                    UserDataDAL.get().saveUserStockPreference(MainActivity.this, myStocks);
                     return Signal.SUCCESS;
                 }
             } else {
@@ -202,26 +184,34 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            if(userPreferences.size()>0) {
+            if (myStocks != null && myStocks.size() > 0) {
                 ArrayList<String> stockSymbols = new ArrayList<String>();
-                for (StockPreference stockPref : userPreferences) {
-                    stockSymbols.add(stockPref.getStockSymbol());
+                for (Stock stock : myStocks) {
+                    stockSymbols.add(stock.getSymbol());
                 }
                 ArrayList<Stock> stocks = StockGrabber.get().getStocks(stockSymbols);
                 if (stocks != null) {
-                    myStocks.clear();
                     for (Stock stock : stocks) {
-                        myStocks.add(stock);
+                        String stockSymbol = stock.getSymbol();
+                        for (Stock oldStock : myStocks) {
+                            if (oldStock.getSymbol().equals(stockSymbol)) {
+                                oldStock.updateData(stock);
+                                break;
+                            }
+                        }
                     }
                 }
             }
-            lastUpdateTime = System.currentTimeMillis();
+            UserDataDAL.get().saveUserStockPreference(MainActivity.this, myStocks);
+            StockezUtil.putPrefLong(MyApplication.getAppContext(),StockConstants.LAST_UPDATE_TIME,System.currentTimeMillis());
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            gridAdapter.notifyDataSetChanged();
+            if (!isFinishing()) {
+                gridAdapter.notifyDataSetChanged();
+            }
 
         }
     }
@@ -258,19 +248,26 @@ public class MainActivity extends ActionBarActivity {
         add_Stock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String stockSymbol = etStockSymbol.getText().toString();
-                String percent = etNotify.getText().toString();
-                StockPreference preference = new StockPreference(stockSymbol, percent);
-                if (stockSymbol != null && !stockSymbol.isEmpty()) {
-                    if (!update) {
-                        new AddStockTask().execute(preference);
-                    } else {
-                        StockPreference stockPref = findStockPrefBySymbol(stockSymbol);
-                        if(stockPref!=null) {
-                            stockPref.setStockSymbol(preference.getStockSymbol());
-                            stockPref.setNotifyOnPercentChange(preference.getNotifyOnPercentChange());
+                if (StockezUtil.isNetworkAvailable(MainActivity.this)) {
+                    String stockSymbol = etStockSymbol.getText().toString();
+                    String percent = etNotify.getText().toString();
+                    StockPreference preference = new StockPreference(stockSymbol, percent);
+                    if (stockSymbol != null && !stockSymbol.isEmpty()) {
+                        if (!update) {
+                            new AddStockTask().execute(preference);
+                        } else {
+                            Stock stock = findStockPrefBySymbol(stockSymbol);
+                            if (stock != null) {
+                                stock.setSymbol(preference.getStockSymbol());
+                                stock.setEliteMobileTechnologyPercentOnNotify(preference.getNotifyOnPercentChange());
+                            }
                         }
+
                     }
+                } else {
+                    Toast toast = Toast.makeText(MainActivity.this, getString(R.string.network_unavailable), Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
                 }
                 myDialog.cancel();
             }
@@ -320,17 +317,9 @@ public class MainActivity extends ActionBarActivity {
                 .setMessage(message).setCancelable(false).setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Iterator iterator = userPreferences.iterator();
+                        Iterator iterator = myStocks.iterator();
                         while (iterator.hasNext()) {
-                            StockPreference stockPref = (StockPreference)iterator.next();
-                            if(stockPref.getStockSymbol().equals(stockToDelete)){
-                                iterator.remove();
-                                break;
-                            }
-                        }
-                        iterator = myStocks.iterator();
-                        while(iterator.hasNext()){
-                            Stock stock = (Stock)iterator.next();
+                            Stock stock = (Stock) iterator.next();
                             if (stock.getSymbol().equals(stockToDelete)) {
                                 myStocks.remove(stock);
                                 parentDialog.cancel();
@@ -368,11 +357,13 @@ public class MainActivity extends ActionBarActivity {
         ivRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displayNotifcation();
-                Toast toast = Toast.makeText(MainActivity.this, "refreshing...", Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(MainActivity.this, getString(R.string.refreshing), Toast.LENGTH_LONG);
+
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();
-                new UpdateStockListTask().execute();
+                Intent intent = new Intent(MainActivity.this, StockUpdateService.class);
+                intent.putExtra(StockUpdateService.SHOW_NOTIFICATION, false);
+                startService(intent);
             }
         });
         actionBar.setCustomView(viewActionBar);
