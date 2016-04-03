@@ -43,10 +43,12 @@ import java.util.Iterator;
 */
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "onCreate";
+    private static final long adExpirationTime = 45*60*1000;
     private final AdRequest adRequest = new AdRequest.Builder().build();
     private ArrayList<Stock> myStocks = null;
     private AdView mAdView;
     private LinearLayout adContainer;
+    private long lastAdLoadTime;
     StockGridAdapter gridAdapter;
     Handler handler = new Handler();
     ActionBar actionBar;
@@ -80,17 +82,19 @@ public class MainActivity extends ActionBarActivity {
             public void onAdOpened() {
                 super.onAdOpened();
                 mAdView.loadAd(adRequest);
+                lastAdLoadTime = System.currentTimeMillis();
             }
 
             @Override
             public void onAdLoaded() {
                 super.onAdLoaded();
-                if(adContainer.getChildCount()==0){
+                if (adContainer.getChildCount() == 0) {
                     adContainer.addView(mAdView);
                 }
             }
         });
         mAdView.loadAd(adRequest);
+        lastAdLoadTime = System.currentTimeMillis();
         myStocks = UserDataDAL.get().getUserStockPreference(this.getApplicationContext());
         buttonAdd = (ImageView) findViewById(R.id.ivAdd);
         lastUpdated = (TextView) findViewById(R.id.tvTimeUpdated);
@@ -142,8 +146,20 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if(mAdView!=null){
+            mAdView.destroy();
+        }
+    }
+    @Override
     public void onResume(){
         super.onResume();
+        long adStallTime = System.currentTimeMillis() - lastAdLoadTime;
+        if(adStallTime > adExpirationTime){
+            mAdView.loadAd(adRequest);
+            lastAdLoadTime = System.currentTimeMillis();
+        }
     }
 
     @Override
