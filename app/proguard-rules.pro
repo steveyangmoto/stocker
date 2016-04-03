@@ -26,13 +26,7 @@
     java.lang.Object writeReplace();
     java.lang.Object readResolve();
 }
--keepclasseswithmember class * {
-    public <init>(android.content.Context, android.util.AttributeSet);
-}
 
--keepclasseswithmember class * {
-    public <init>(android.content.Context, android.util.AttributeSet, int);
-}
 -keepattributes Signature
 -keep class android.support.** { *; }
 -keep class org.apache.http.** { *; }

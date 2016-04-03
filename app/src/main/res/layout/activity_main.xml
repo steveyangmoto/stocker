@@ -55,20 +55,17 @@
                 android:fontFamily="sans-serif-regular" />
         </LinearLayout>
 
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
-            android:visibility="gone"
+        <LinearLayout android:orientation="vertical"
+            android:id="@+id/adViewLayout"
             android:layout_below="@+id/layout_update"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            ads:adSize="SMART_BANNER"
-            ads:adUnitId="@string/banner_ad_unit_id">
-        </com.google.android.gms.ads.AdView>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </LinearLayout>
 
         <LinearLayout
             android:orientation="horizontal"
             android:id="@+id/layout_line"
-            android:layout_below="@+id/adView"
+            android:layout_below="@+id/adViewLayout"
             android:background="#6b6c92"
             android:layout_width="fill_parent"
             android:layout_height="1dp" />
