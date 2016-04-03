@@ -1,4 +1,4 @@
-package com.elitemobiletechnology.stocker;
+package com.elitemobiletechnology.stockez;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

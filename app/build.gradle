@@ -3,9 +3,16 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-
+    signingConfigs {
+        releaseSignConfig {
+            keyAlias 'stockez_key'
+            keyPassword 'zx47mk'
+            storeFile file('./steve_release_key.keystore')
+            storePassword 'zx47mk'
+        }
+    }
     defaultConfig {
-        applicationId "com.elitemobiletechnology.stocker"
+        applicationId "com.elitemobiletechnology.stockez"
         minSdkVersion 14
         targetSdkVersion 21
         versionCode 1
@@ -13,6 +20,11 @@ android {
     }
     buildTypes {
         release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.releaseSignConfig
+        }
+        debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -20,6 +32,9 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'com.github.kevinsawicki:http-request:6.0'
+    compile 'com.google.android.gms:play-services-ads:7.5.0'
 }

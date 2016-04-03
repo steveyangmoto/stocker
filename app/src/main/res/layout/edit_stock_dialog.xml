@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add_stock_text"
+        android:id="@+id/tvEditStock"
+        android:layout_marginTop="20dp"
+        android:textColor="@android:color/black"
+        android:fontFamily="sans-serif-light"
+        android:layout_centerHorizontal="true" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvEditStock"
+        android:text="@string/stock_symbol"
+        android:id="@+id/tvStockSymbol"
+        android:textColor="@color/stocker_gray"
+        android:layout_marginTop="20dp"
+        android:gravity="right"
+        android:fontFamily="sans-serif-light"
+        android:layout_alignRight="@+id/tvNotify"
+        android:layout_alignParentLeft="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_toRightOf="@+id/tvStockSymbol"
+        android:fontFamily="sans-serif-light"
+        android:layout_alignBaseline="@+id/tvStockSymbol"
+        android:ems="6"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:paddingLeft="5dp"
+        android:selectAllOnFocus="true"
+        android:text="GOOG"
+        android:inputType="textCapCharacters"
+        android:background="@drawable/edit_text_border"
+        android:id="@+id/etStockSymbol" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/notify_once"
+        android:textColor="@color/stocker_gray"
+        android:fontFamily="sans-serif-light"
+        android:layout_below="@+id/tvStockSymbol"
+        android:id="@+id/tvNotify" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/tvNotify"
+        android:layout_alignBaseline="@+id/tvNotify"
+        android:layout_alignLeft="@id/etStockSymbol"
+        android:fontFamily="sans-serif-light"
+        android:layout_marginRight="2dp"
+        android:ems="2"
+        android:inputType="numberDecimal"
+        android:text="0"
+        android:selectAllOnFocus="true"
+        android:maxLines="1"
+        android:paddingLeft="2dp"
+        android:background="@drawable/edit_text_border"
+        android:id="@+id/etNotify" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/price_changes"
+        android:textColor="@color/stocker_gray"
+        android:fontFamily="sans-serif-light"
+        android:layout_toRightOf="@id/etNotify"
+        android:layout_alignBaseline="@+id/tvNotify"
+        android:id="@+id/tvPriceChanges" />
+
+    <LinearLayout
+        android:id="@+id/buttonLayout"
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/tvNotify"
+        android:orientation="horizontal"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="20dp"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/add_button"
+            android:adjustViewBounds="true"
+            android:padding="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/add_button" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:adjustViewBounds="true"
+            android:layout_marginLeft="20dp"
+            android:padding="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/cancel_button"
+            android:src="@mipmap/cancel_button" />
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/trash_button"
+        android:adjustViewBounds="true"
+        android:padding="0dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:layout_alignBottom="@+id/buttonLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:visibility="gone"
+        android:src="@mipmap/trash" />
+</RelativeLayout>

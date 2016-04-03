@@ -15,3 +15,30 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-dontwarn android.support.**
+-keepnames class * implements java.io.Serializable
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    !static !transient <fields>;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+-keepclasseswithmember class * {
+    public <init>(android.content.Context, android.util.AttributeSet);
+}
+
+-keepclasseswithmember class * {
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
+-keepattributes Signature
+-keep class android.support.** { *; }
+-keep class org.apache.http.** { *; }
+-keep class com.elitemobiletechnology.stockez.model.** { *; }
+-keep class com.google.** {*;}
+-keep class com.google.gson.** { *; }
+-keep class sun.misc.Unsafe { *; }
+
+

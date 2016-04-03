@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="stocker_green">#6cc5ba</color>
+    <color name="stocker_gray">#5f6288</color>
+    <color name="notification_gray_line">#f1f2f6</color>
+    <color name="stocker_border">#b6b7c6</color>
 </resources>
