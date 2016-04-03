@@ -74,8 +74,14 @@ public class MainActivity extends ActionBarActivity {
         mAdView = new AdView(this);
         mAdView.setAdSize(AdSize.SMART_BANNER);
         mAdView.setAdUnitId(StockConstants.ADMOB_UNIT_ID);
-        mAdView.loadAd(adRequest);
         mAdView.setAdListener(new AdListener() {
+
+            @Override
+            public void onAdOpened() {
+                super.onAdOpened();
+                mAdView.loadAd(adRequest);
+            }
+
             @Override
             public void onAdLoaded() {
                 super.onAdLoaded();
@@ -84,6 +90,7 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         });
+        mAdView.loadAd(adRequest);
         myStocks = UserDataDAL.get().getUserStockPreference(this.getApplicationContext());
         buttonAdd = (ImageView) findViewById(R.id.ivAdd);
         lastUpdated = (TextView) findViewById(R.id.tvTimeUpdated);
@@ -137,7 +144,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onResume(){
         super.onResume();
-        mAdView.loadAd(adRequest);
     }
 
     @Override
