@@ -23,6 +23,7 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +32,7 @@ import com.elitemobiletechnology.stockez.model.StockPreference;
 import com.elitemobiletechnology.stockez.model.UserDataDAL;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 
 import java.util.ArrayList;
@@ -44,6 +46,7 @@ public class MainActivity extends ActionBarActivity {
     private final AdRequest adRequest = new AdRequest.Builder().build();
     private ArrayList<Stock> myStocks = null;
     private AdView mAdView;
+    private LinearLayout adContainer;
     StockGridAdapter gridAdapter;
     Handler handler = new Handler();
     ActionBar actionBar;
@@ -67,14 +70,17 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mAdView = (AdView) findViewById(R.id.adView);
+        adContainer = (LinearLayout)findViewById(R.id.adViewLayout);
+        mAdView = new AdView(this);
+        mAdView.setAdSize(AdSize.SMART_BANNER);
+        mAdView.setAdUnitId(StockConstants.ADMOB_UNIT_ID);
         mAdView.loadAd(adRequest);
         mAdView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
                 super.onAdLoaded();
-                if (mAdView.getVisibility() != View.VISIBLE) {
-                    mAdView.setVisibility(View.VISIBLE);
+                if(adContainer.getChildCount()==0){
+                    adContainer.addView(mAdView);
                 }
             }
         });
