@@ -13,6 +13,7 @@ import com.elitemobiletechnology.stockez.model.Stock;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.gson.Gson;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 /**
@@ -32,16 +33,17 @@ public class StockGrabber {
 
     public Stock getStock(String symbol) {
         String url = "";
+        HttpRequest request;
         try {
             Uri.Builder b = Uri.parse("http://query.yahooapis.com/v1/public/yql").buildUpon();
             b.appendQueryParameter("q", "select * from yahoo.finance.quotes where symbol in (\"" + symbol + "\")");
             b.appendQueryParameter("env", "http://datatables.org/alltables.env");
             b.appendQueryParameter("format", "json");
-            url = b.build().toString();
+            url = URLEncoder.encode(b.build().toString(), "UTF-8");
+            request = HttpRequest.get(url);
         } catch (Exception e) {
             return null;
         }
-        HttpRequest request = HttpRequest.get(url);
 
         if (request.ok()) {
             String response = request.body();
@@ -74,16 +76,18 @@ public class StockGrabber {
             symbols += symbol + ",";
         }
         String url = "";
+        HttpRequest request=null;
         try {
             Uri.Builder b = Uri.parse("http://query.yahooapis.com/v1/public/yql").buildUpon();
             b.appendQueryParameter("q", "select * from yahoo.finance.quotes where symbol in (\"" + symbols + "\")");
             b.appendQueryParameter("env", "http://datatables.org/alltables.env");
             b.appendQueryParameter("format", "json");
-            url = b.build().toString();
-        } catch (Exception e) {
+            url = URLEncoder.encode(b.build().toString(),"UTF-8");
+            request = HttpRequest.get(url);
+        }
+        catch (Exception e) {
             return null;
         }
-        HttpRequest request = HttpRequest.get(url);
 
         if (request!=null&&request.ok()) {
 
