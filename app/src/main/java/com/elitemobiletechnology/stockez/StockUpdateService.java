@@ -31,7 +31,7 @@ public class StockUpdateService extends IntentService {
                     for (Stock stock : myStocks) {
                         stockSymbols.add(stock.getSymbol());
                     }
-                    ArrayList<Stock> stocks = StockGrabber.get().getStocks(stockSymbols);
+                    ArrayList<Stock> stocks = StockGrabber.get().getStocks(getApplicationContext(),stockSymbols);
                     if (stocks != null) {
                         for (Stock stock : stocks) {
                             String stockSymbol = stock.getSymbol();

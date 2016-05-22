@@ -1,5 +1,6 @@
 package com.elitemobiletechnology.stockez;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
@@ -31,16 +32,19 @@ public class StockGrabber {
         return stockGrabber;
     }
 
-    public Stock getStock(String symbol) {
-        String url = "";
+    public Stock getStock(Context context,String symbol) {
+        if(!StockezUtil.isNetworkAvailable(context)){
+            return null;
+        }
         HttpRequest request;
         try {
             Uri.Builder b = Uri.parse("http://query.yahooapis.com/v1/public/yql").buildUpon();
             b.appendQueryParameter("q", "select * from yahoo.finance.quotes where symbol in (\"" + symbol + "\")");
             b.appendQueryParameter("env", "http://datatables.org/alltables.env");
             b.appendQueryParameter("format", "json");
-            url = URLEncoder.encode(b.build().toString(), "UTF-8");
-            request = HttpRequest.get(url);
+
+
+            request = HttpRequest.get(b.build().toString());
         } catch (Exception e) {
             return null;
         }
@@ -67,23 +71,22 @@ public class StockGrabber {
         return null;
     }
 
-    public ArrayList<Stock> getStocks(ArrayList<String> stockSymobols) {
+    public ArrayList<Stock> getStocks(Context context,ArrayList<String> stockSymobols) {
         String symbols = "";
-        if(stockSymobols.size()<=0){
+        if(stockSymobols.size()<=0||!StockezUtil.isNetworkAvailable(context)){
             return null;
         }
         for (String symbol : stockSymobols) {
             symbols += symbol + ",";
         }
-        String url = "";
         HttpRequest request=null;
         try {
             Uri.Builder b = Uri.parse("http://query.yahooapis.com/v1/public/yql").buildUpon();
             b.appendQueryParameter("q", "select * from yahoo.finance.quotes where symbol in (\"" + symbols + "\")");
             b.appendQueryParameter("env", "http://datatables.org/alltables.env");
             b.appendQueryParameter("format", "json");
-            url = URLEncoder.encode(b.build().toString(),"UTF-8");
-            request = HttpRequest.get(url);
+
+            request = HttpRequest.get(b.build().toString());
         }
         catch (Exception e) {
             return null;

@@ -179,7 +179,7 @@ public class MainActivity extends ActionBarActivity {
         protected Signal doInBackground(StockPreference... preference) {
             StockPreference stockInfo = preference[0];
             if (findStockPrefBySymbol(stockInfo.getStockSymbol()) == null) {
-                Stock stock = StockGrabber.get().getStock(stockInfo.getStockSymbol());
+                Stock stock = StockGrabber.get().getStock(MainActivity.this.getApplicationContext(),stockInfo.getStockSymbol());
                 if (stock != null) {
                     stock.setEliteMobileTechnologyPercentOnNotify(stockInfo.getNotifyOnPercentChange());
                     myStocks.add(0, stock);
@@ -217,7 +217,7 @@ public class MainActivity extends ActionBarActivity {
                 for (Stock stock : myStocks) {
                     stockSymbols.add(stock.getSymbol());
                 }
-                ArrayList<Stock> stocks = StockGrabber.get().getStocks(stockSymbols);
+                ArrayList<Stock> stocks = StockGrabber.get().getStocks(MainActivity.this.getApplicationContext(),stockSymbols);
                 if (stocks != null) {
                     for (Stock stock : stocks) {
                         String stockSymbol = stock.getSymbol();
